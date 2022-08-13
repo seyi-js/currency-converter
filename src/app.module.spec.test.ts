@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import appConfig from './config/app.config';
 import dbConfig from './config/db.config';
-import { IAppConfig } from './config/interface';
 import { CurrencyModule } from './modules/currency/currency.module';
 
 @Module({
@@ -16,11 +16,11 @@ import { CurrencyModule } from './modules/currency/currency.module';
     }),
 
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (config: ConfigService) => ({
-        ...dbConfig().mongodb[config.get<IAppConfig>('app').environment],
+      useFactory: async () => ({
+        uri: (
+          await MongoMemoryReplSet.create({ replSet: { count: 2 } })
+        ).getUri(),
       }),
-      inject: [ConfigService],
     }),
 
     CurrencyModule,
@@ -28,4 +28,4 @@ import { CurrencyModule } from './modules/currency/currency.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppSpecModule {}

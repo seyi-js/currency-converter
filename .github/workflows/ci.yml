@@ -1,0 +1,45 @@
+name: CI/CD pipeline
+# concurrency: test
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    concurrency: test
+    environment: test
+    strategy:
+      matrix:
+        node-version: [16]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - run: npm ci --legacy-peer-deps
+      - run: npm run build --if-present
+      - run: npm run lint
+      - name: run  tests
+        run: npm run test
+
+  production:
+    needs: test
+    runs-on: ubuntu-latest
+    concurrency: production
+    environment: production
+    steps:
+      - uses: actions/checkout@v2
+      - uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: 'creditsyncstaging'
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
+          healthcheck: https://seyijs-currency-converter.herokuapp.com/
+          delay: 60
+          rollbackonhealthcheckfailed: true
