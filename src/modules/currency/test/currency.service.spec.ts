@@ -19,6 +19,8 @@ describe('CurrencyService', () => {
     expect(service).toBeDefined();
   });
 
+  let id: string;
+
   describe('createCurrency', () => {
     it('should create a currency', async () => {
       const payload = {
@@ -28,6 +30,8 @@ describe('CurrencyService', () => {
       };
 
       const currency = await service.createCurrency(payload);
+
+      id = currency._id;
 
       expect(currency.source).toBe(payload.source);
       expect(currency.destination).toBe(payload.destination);
@@ -55,6 +59,26 @@ describe('CurrencyService', () => {
       });
 
       expect(result.conversion).toBe(500000);
+    });
+  });
+
+  describe('update', () => {
+    it('should update a currency rate', async () => {
+      const payload = {
+        rate: 1000,
+      };
+
+      const result = await service.update(id, payload);
+
+      expect(result.rate).toBe(1000);
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete a currency', async () => {
+      const result = await service.delete({ _id: id });
+
+      expect(result.deletedCount).toBe(1);
     });
   });
 });

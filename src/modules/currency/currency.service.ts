@@ -53,6 +53,14 @@ export class CurrencyService {
     return currency;
   }
 
+  async update(id: string, payload: any) {
+    return await this.model.findByIdAndUpdate(id, payload, { new: true });
+  }
+
+  async delete(payload: any) {
+    return await this.model.deleteOne(payload);
+  }
+
   private async isExist(source: string, destination: string) {
     const currency = await this.model.findOne({ source, destination });
 

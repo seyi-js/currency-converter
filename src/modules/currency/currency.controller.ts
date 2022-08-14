@@ -1,6 +1,20 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { CurrencyService } from './currency.service';
-import { ConvertDTO, CreateCurrencyDTO, GetRateDTO } from './dto';
+import {
+  ConvertDTO,
+  CreateCurrencyDTO,
+  GetRateDTO,
+  UpdateRateDTO,
+} from './dto';
 
 @Controller('currencies')
 export class CurrencyController {
@@ -43,6 +57,25 @@ export class CurrencyController {
     return {
       message: 'Currencies retrieved successfully',
       currencies,
+    };
+  }
+
+  @Delete('/:id')
+  async delete(@Param('id') id: string) {
+    await this.service.delete({ _id: id });
+
+    return {
+      message: 'Currency rate deleted successfully',
+    };
+  }
+
+  @Put('/:id')
+  async update(@Param('id') id: string, @Body() payload: UpdateRateDTO) {
+    const rate = await this.service.update(id, payload);
+
+    return {
+      message: 'Currency rate updated successfully',
+      rate,
     };
   }
 }
